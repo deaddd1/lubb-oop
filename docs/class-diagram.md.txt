@@ -1,0 +1,60 @@
+# Діаграма класів (UML)
+
+```mermaid
+classDiagram
+    class IComponent {
+        <<interface>>
+        +Render() string
+    }
+    
+    class MenuItem {
+        -Guid id
+        -string name
+        -decimal price
+        -string category
+        +MenuItem(string name, decimal price, string category)
+        +UpdatePrice(decimal newPrice)
+    }
+
+    class OrderItem {
+        -MenuItem item
+        -int quantity
+        +OrderItem(MenuItem item, int quantity)
+        +CalculateTotal() decimal
+    }
+
+    class Order {
+        -Guid id
+        -int tableNumber
+        -List~OrderItem~ items
+        -string status
+        +Order(int tableNumber)
+        +AddItem(MenuItem item, int quantity)
+        +ChangeStatus(string newStatus)
+        +CalculateTotal() decimal
+    }
+
+    class IOrderRepository {
+        <<interface>>
+        +Save(Order order)
+        +GetById(Guid id)
+        +GetAll() IEnumerable~Order~
+    }
+
+    class InMemoryOrderRepository {
+        -Dictionary~Guid, Order~ _orders
+        +Save(Order order)
+        +GetById(Guid id)
+    }
+
+    class OrderApplicationService {
+        -IOrderRepository _repository
+        +OrderApplicationService(IOrderRepository repo)
+        +CreateNewOrder(int tableNumber) Order
+        +AddItemToOrder(Guid orderId, MenuItem item, int qty)
+    }
+
+    OrderApplicationService --> IOrderRepository : dependency
+    InMemoryOrderRepository ..|> IOrderRepository : implements
+    Order "1" *-- "many" OrderItem : contains
+    OrderItem "1" o-- "1" MenuItem : references
